@@ -11,13 +11,13 @@ SimpleCov.start do
   add_filter "/vendor/"
 end
 
-require 'ruby_ami'
+require 'ruby_fs'
 require 'mocha'
 require 'countdownlatch'
 
 Dir[File.dirname(__FILE__) + "/support/**/*.rb"].each {|f| require f}
 
-include RubyAMI
+include RubyFS
 
 RSpec.configure do |config|
   config.mock_with :mocha

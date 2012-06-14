@@ -174,13 +174,13 @@ end
 
 Then 'the $order AMI error should have the message "$message"' do |order, message|
   order = order[/^(\d+)\w+$/, 1].to_i - 1
-  @lexer.ami_errors[order].should be_kind_of(RubyAMI::Error)
+  @lexer.ami_errors[order].should be_kind_of(RubyFS::Error)
   @lexer.ami_errors[order].message.should eql(message)
 end
 
 Then '$number message should be an immediate response with text "$text"' do |number, text|
   matching_immediate_responses = @lexer.received_messages.select do |response|
-    response.kind_of?(RubyAMI::Response) && response.text_body == text
+    response.kind_of?(RubyFS::Response) && response.text_body == text
   end
   matching_immediate_responses.size.should equal(number.to_i)
   matching_immediate_responses.first["ActionID"].should eql(nil)
@@ -189,19 +189,19 @@ end
 Then 'the $order event should have the name "$name"' do |order, name|
   order = order[/^(\d+)\w+$/, 1].to_i - 1
   @lexer.received_messages.select do |response|
-    response.kind_of?(RubyAMI::Event)
+    response.kind_of?(RubyFS::Event)
   end[order].name.should eql(name)
 end
 
 Then '$number event should have been received' do |number|
   @lexer.received_messages.select do |response|
-    response.kind_of?(RubyAMI::Event)
+    response.kind_of?(RubyFS::Event)
   end.size.should equal(number.to_i)
 end
 
 Then 'the $order event should have key "$key" with value "$value"' do |order, key, value|
   order = order[/^(\d+)\w+$/, 1].to_i - 1
   @lexer.received_messages.select do |response|
-    response.kind_of?(RubyAMI::Event)
+    response.kind_of?(RubyFS::Event)
   end[order][key].should eql(value)
 end

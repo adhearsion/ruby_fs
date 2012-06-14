@@ -1,4 +1,4 @@
-module RubyAMI
+module RubyFS
   class Stream
     class ConnectionStatus
       def eql?(other)

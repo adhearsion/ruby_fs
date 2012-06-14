@@ -1,0 +1,3 @@
+module RubyFS
+  VERSION = "0.0.1"
+end

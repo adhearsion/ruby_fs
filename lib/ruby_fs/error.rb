@@ -1,4 +1,4 @@
-module RubyAMI
+module RubyFS
   class Error < StandardError
     attr_accessor :message, :action
 
@@ -22,4 +22,4 @@ module RubyAMI
       "#<#{self.class} #{[:message, :headers].map { |c| "#{c}=#{self.__send__(c).inspect rescue nil}" }.compact * ', '}>"
     end
   end
-end # RubyAMI
+end # RubyFS

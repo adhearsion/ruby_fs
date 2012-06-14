@@ -1,4 +1,4 @@
-module RubyAMI
+module RubyFS
   class Lexer
 
     KILOBYTE = 1024

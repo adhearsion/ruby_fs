@@ -1,5 +1,5 @@
 Feature: Lexing AMI
-  As a RubyAMI user
+  As a RubyFS user
   I want to lex the AMI protocol
   So that I can control Asterisk asynchronously
 

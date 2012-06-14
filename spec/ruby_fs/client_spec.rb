@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module RubyAMI
+module RubyFS
   describe Client do
     let(:event_handler) { [] }
 

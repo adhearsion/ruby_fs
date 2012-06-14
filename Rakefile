@@ -36,7 +36,7 @@ task :check_ragel_version do
   end
 end
 
-desc "Used to regenerate the AMI source code files. Note: requires Ragel 6.3 or later be installed on your system"
+desc "Used to regenerate the lexer source code files. Note: requires Ragel 6.3 or later be installed on your system"
 task :ragel => :check_ragel_version do
   run_ragel '-n -R'
 end
@@ -47,7 +47,7 @@ task :visualize_ragel => :check_ragel_version do
 end
 
 def run_ragel(options = nil, extension = 'rb')
-  ragel_file = 'lib/ruby_ami/lexer.rl.rb'
+  ragel_file = 'lib/ruby_fs/lexer.rl.rb'
   base_file = ragel_file.sub ".rl.rb", ""
   command = ["ragel", options, "#{ragel_file} -o #{base_file}.#{extension} 2>&1"].compact.join ' '
   puts "Running command '#{command}'"

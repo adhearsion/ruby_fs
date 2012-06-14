@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module RubyAMI
+module RubyFS
   describe Event do
     describe "equality" do
       context "with the same name and the same headers" do
@@ -70,4 +70,4 @@ module RubyAMI
       end
     end
   end # Event
-end # RubyAMI
+end # RubyFS

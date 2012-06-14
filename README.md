@@ -1,36 +1,26 @@
-# RubyAMI [![Build Status](https://secure.travis-ci.org/adhearsion/ruby_ami.png?branch=master)](http://travis-ci.org/adhearsion/ruby_ami)
-RubyAMI is an AMI client library in Ruby and based on EventMachine with the sole purpose of providing an connection to the Asterisk Manager Interface. RubyAMI does not provide any features beyond connection management and protocol parsing. Actions are sent over the wire, and responses come back via callbacks. It's up to you to match these up into something useful. In this regard, RubyAMI is very similar to [Blather](https://github.com/sprsquish/blather) for XMPP or [Punchblock](https://github.com/adhearsion/punchblock), the Ruby 3PCC library. In fact, Punchblock uses RubyAMI under the covers for its Asterisk implementation, including an implementation of AsyncAGI.
+# RubyFS [![Build Status](https://secure.travis-ci.org/adhearsion/ruby_fs.png?branch=master)](http://travis-ci.org/adhearsion/ruby_fs)
+RubyFS is a FreeSWITCH EventSocket client library in Ruby and based on Celluloid actors with the sole purpose of providing a connection to the EventSocket API. RubyFS does not provide any features beyond connection management and protocol parsing. Actions are sent over the wire, and responses come back via callbacks. It's up to you to match these up into something useful. In this regard, RubyFS is very similar to [Blather](https://github.com/sprsquish/blather) for XMPP or [Punchblock](https://github.com/adhearsion/punchblock), the Ruby 3PCC library. In fact, Punchblock uses RubyFS under the covers for its FreeSWITCH implementation.
 
 ## Installation
-    gem install ruby_ami
+    gem install ruby_fs
 
 ## Usage
 ```ruby
-require 'ruby_ami'
+require 'ruby_fs'
 
-include RubyAMI
-
-client = Client.new :username       => 'test',
-                    :password       => 'test',
-                    :host           => '127.0.0.1',
-                    :port           => 5038,
-                    :event_handler  => lambda { |e| handle_event e },
-                    :logger         => Logger.new('ruby_ami.log')
-
-def handle_event(event)
-  case event.name
-  when 'FullyBooted'
-    client.send_action 'Originate', 'Channel' => 'SIP/foo'
-  end
-end
+client = RubyFS::Client.new :password       => 'ClueCon',
+                            :host           => '127.0.0.1',
+                            :port           => 8021,
+                            :event_handler  => lambda { |e| p e },
+                            :logger         => Logger.new('ruby_fs.log')
 
 client.start
 ```
 
 ## Links:
-* [Source](https://github.com/adhearsion/ruby_ami)
-* [Documentation](http://rdoc.info/github/adhearsion/ruby_ami/master/frames)
-* [Bug Tracker](https://github.com/adhearsion/ruby_ami/issues)
+* [Source](https://github.com/adhearsion/ruby_fs)
+* [Documentation](http://rdoc.info/github/adhearsion/ruby_fs/master/frames)
+* [Bug Tracker](https://github.com/adhearsion/ruby_fs/issues)
 
 ## Note on Patches/Pull Requests
 
@@ -43,4 +33,4 @@ client.start
 
 ## Copyright
 
-Copyright (c) 2011 Ben Langfeld, Jay Phillips. MIT licence (see LICENSE for details).
+Copyright (c) 2012 Ben Langfeld. MIT licence (see LICENSE for details).

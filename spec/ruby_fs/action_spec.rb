@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module RubyAMI
+module RubyFS
   describe Action do
     let(:name) { 'foobar' }
     let(:headers) { {'foo' => 'bar'} }
@@ -184,4 +184,4 @@ module RubyAMI
       end
     end
   end # Action
-end # RubyAMI
+end # RubyFS

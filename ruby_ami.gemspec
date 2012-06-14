@@ -1,19 +1,19 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "ruby_ami/version"
+require "ruby_fs/version"
 
 Gem::Specification.new do |s|
-  s.name        = "ruby_ami"
-  s.version     = RubyAMI::VERSION
+  s.name        = "ruby_fs"
+  s.version     = RubyFS::VERSION
   s.authors     = ["Ben Langfeld"]
   s.email       = ["ben@langfeld.me"]
   s.homepage    = ""
-  s.summary     = %q{Futzing with AMI so you don't have to}
-  s.description = %q{A Ruby client library for the Asterisk Management Interface build on eventmachine.}
+  s.summary     = %q{Wrapping FreeSWITCH EventSocket for rubyists}
+  s.description = %q{A Ruby client library for the FreeSWITCH EventSocket API built on Celluloid.}
 
-  s.rubyforge_project = "ruby_ami"
+  s.rubyforge_project = "ruby_fs"
 
-  s.files         = `git ls-files`.split("\n") << 'lib/ruby_ami/lexer.rb'
+  s.files         = `git ls-files`.split("\n") << 'lib/ruby_fs/lexer.rb'
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]

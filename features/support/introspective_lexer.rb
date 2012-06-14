@@ -1,4 +1,4 @@
-class IntrospectiveManagerStreamLexer < RubyAMI::Lexer
+class IntrospectiveManagerStreamLexer < RubyFS::Lexer
   attr_reader :received_messages, :syntax_errors, :ami_errors
 
   def initialize(*args)

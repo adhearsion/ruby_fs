@@ -1,4 +1,4 @@
-module RubyAMI
+module RubyFS
   class Action
     attr_reader :name, :headers, :action_id
 
@@ -95,7 +95,7 @@ module RubyAMI
       when Error
         self.response = message
       when Event
-        raise StandardError, 'This action should not trigger events. Maybe it is now a causal action? This is most likely a bug in RubyAMI' unless has_causal_events?
+        raise StandardError, 'This action should not trigger events. Maybe it is now a causal action? This is most likely a bug in RubyFS' unless has_causal_events?
         @event_lock.synchronize do
           @events << message
         end
@@ -144,4 +144,4 @@ module RubyAMI
       end
     end
   end
-end # RubyAMI
+end # RubyFS

@@ -11,7 +11,7 @@ class Logger
   alias :trace :debug
 end
 
-module RubyAMI
+module RubyFS
 end
 
 %w{
@@ -24,4 +24,4 @@ end
   response
   stream
   version
-}.each { |f| require "ruby_ami/#{f}" }
+}.each { |f| require "ruby_fs/#{f}" }

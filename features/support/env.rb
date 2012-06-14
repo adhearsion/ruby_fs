@@ -13,4 +13,4 @@ end
 
 require 'cucumber'
 require 'rspec'
-require 'ruby_ami'
+require 'ruby_fs'

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module RubyAMI
+module RubyFS
   describe Stream do
     let(:server_port) { 50000 - rand(1000) }
 

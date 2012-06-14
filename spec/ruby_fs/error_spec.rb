@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-module RubyAMI
+module RubyFS
   describe Error do
     pending
   end # Error
-end # RubyAMI
+end # RubyFS

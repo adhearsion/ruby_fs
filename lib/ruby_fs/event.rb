@@ -1,6 +1,6 @@
-require 'ruby_ami/response'
+require 'ruby_fs/response'
 
-module RubyAMI
+module RubyFS
   class Event < Response
     attr_reader :name
 
@@ -13,4 +13,4 @@ module RubyAMI
       [:name] + super
     end
   end
-end # RubyAMI
+end # RubyFS

@@ -1,4 +1,4 @@
-module RubyAMI
+module RubyFS
   ##
   # This is the object containing a response from Asterisk.
   #
@@ -54,4 +54,4 @@ module RubyAMI
     end
     alias :== :eql?
   end
-end # RubyAMI
+end # RubyFS

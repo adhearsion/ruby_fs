@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module RubyAMI
+module RubyFS
   describe Response do
     describe "equality" do
       context "with the same headers" do
@@ -48,4 +48,4 @@ module RubyAMI
       end
     end
   end # Response
-end # RubyAMI
+end # RubyFS

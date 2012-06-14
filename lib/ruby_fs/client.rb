@@ -1,4 +1,4 @@
-module RubyAMI
+module RubyFS
   class Client
     attr_reader :options, :action_queue, :events_stream, :actions_stream
 
@@ -22,7 +22,7 @@ module RubyAMI
           action.response action.sync_timeout
         rescue Timeout::Error => e
           logger.error "Timed out waiting for a response to #{action}"
-        rescue RubyAMI::Error
+        rescue RubyFS::Error
           nil
         end
       end
