@@ -50,81 +50,25 @@ module RubyFS
         end
       end
 
-      it "can send a command" do
+      it "can send data" do
         expect_connected_event
         expect_disconnected_event
-        action = Action.new('Command', 'Command' => 'RECORD FILE evil', 'ActionID' => 666, 'Events' => 'On')
-        mocked_server(1, lambda { @stream.send_action action }) do |val, server|
-          val.should == action.to_s
+        mocked_server(1, lambda { @stream.send_data "foo" }) do |val, server|
+          val.should == "foo"
         end
       end
     end
 
     it 'sends events to the client when the stream is ready' do
       mocked_server(1, lambda { @stream.send_data 'Foo' }) do |val, server|
-        server.send_data <<-EVENT
-Event: Hangup
-Channel: SIP/101-3f3f
-Uniqueid: 1094154427.10
-Cause: 0
-
-        EVENT
+        server.send_data 'foo'
       end
 
       client_messages.should be == [
         Stream::Connected.new,
-        Event.new('Hangup').tap do |e|
-          e['Channel'] = 'SIP/101-3f3f'
-          e['Uniqueid'] = '1094154427.10'
-          e['Cause'] = '0'
-        end,
+        'foo',
         Stream::Disconnected.new
       ]
-    end
-
-    it 'sends responses to the client when the stream is ready' do
-      mocked_server(1, lambda { @stream.send_data 'Foo' }) do |val, server|
-        server.send_data <<-EVENT
-Response: Success
-ActionID: ee33eru2398fjj290
-Message: Authentication accepted
-
-        EVENT
-      end
-
-      client_messages.should be == [
-        Stream::Connected.new,
-        Response.new.tap do |r|
-          r['ActionID'] = 'ee33eru2398fjj290'
-          r['Message'] = 'Authentication accepted'
-        end,
-        Stream::Disconnected.new
-      ]
-    end
-
-    it 'sends error to the client when the stream is ready and a bad command was send' do
-      client.expects(:message_received).times(3).with do |r|
-        case @sequence
-        when 1
-          r.should be_a Stream::Connected
-        when 2
-          r.should be_a Error
-          r['ActionID'].should == 'ee33eru2398fjj290'
-          r['Message'].should == 'You stupid git'
-        when 3
-          r.should be_a Stream::Disconnected
-        end
-        @sequence += 1
-      end
-
-      mocked_server(1, lambda { @stream.send_data 'Foo' }) do |val, server|
-        server.send_data <<-EVENT
-Response: Error
-ActionID: ee33eru2398fjj290
-Message: You stupid git
-
-        EVENT
-      end
     end
 
     it 'puts itself in the stopped state and fires a disconnected event when unbound' do

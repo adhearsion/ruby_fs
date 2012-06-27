@@ -17,7 +17,6 @@ module RubyFS
       super()
       @event_callback = event_callback
       logger.debug "Starting up..."
-      @lexer = Lexer.new self
       @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(host, port)
       post_init
       run!
@@ -36,35 +35,28 @@ module RubyFS
 
     def post_init
       @state = :started
-      @event_callback.call Connected.new
+      fire_event Connected.new
     end
 
     def send_data(data)
-      @socket.write data
-    end
-
-    def send_action(action)
-      logger.debug "[SEND] #{action.to_s}"
-      send_data action.to_s
+      logger.debug "[SEND] #{data.to_s}"
+      @socket.write data.to_s
     end
 
     def receive_data(data)
       logger.debug "[RECV] #{data}"
-      @lexer << data
+      fire_event data
     end
-
-    def message_received(message)
-      logger.debug "[RECV] #{message.inspect}"
-      @event_callback.call message
-    end
-
-    alias :error_received :message_received
 
     def finalize
       logger.debug "Finalizing stream"
       @socket.close if @socket
       @state = :stopped
-      @event_callback.call Disconnected.new
+      fire_event Disconnected.new
+    end
+
+    def fire_event(event)
+      @event_callback.call event
     end
 
     def logger
