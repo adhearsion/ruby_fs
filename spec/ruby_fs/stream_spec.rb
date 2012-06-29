@@ -21,13 +21,14 @@ module RubyFS
       messages
     end
 
-    let(:secret) { 'ClueCon' }
+    let(:secret)  { 'ClueCon' }
+    let(:events)  { false }
 
     def mocked_server(times = nil, fake_client = nil, &block)
       mock_target = MockServer.new
       mock_target.expects(:receive_data).send(*(times ? [:times, times] : [:at_least, 1])).with &block
       s = ServerMock.new '127.0.0.1', server_port, mock_target
-      @stream = Stream.new '127.0.0.1', server_port, secret, lambda { |m| client.message_received m }
+      @stream = Stream.new '127.0.0.1', server_port, secret, lambda { |m| client.message_received m }, events
       fake_client.call s if fake_client.respond_to? :call
       s.join
       @stream.join
@@ -174,6 +175,55 @@ Reply-Text: +OK accepted
         Stream::Connected.new,
         Stream::Disconnected.new
       ]
+    end
+
+    context 'with events turned on' do
+      let(:events) { true }
+
+      it 'sets the event mask after authenticating' do
+        mocked_server(2, lambda { |server| server.send_data "Content-Type: auth/request\n\n" }) do |val, server|
+          case @sequence
+          when 1
+            val.should == "auth ClueCon\n\n"
+            server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+          when 2
+            val.should == "event json ALL\n\n"
+            server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+          end
+          @sequence += 1
+        end
+
+        client_messages.should be == [
+          Stream::Connected.new,
+          Stream::Disconnected.new
+        ]
+      end
+    end
+
+    context 'with events turned off' do
+      it 'does not the event mask after authenticating' do
+        mocked_server(1, lambda { |server| server.send_data "Content-Type: auth/request\n\n" }) do |val, server|
+          val.should == "auth ClueCon\n\n"
+          server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+        end
+
+        client_messages.should be == [
+          Stream::Connected.new,
+          Stream::Disconnected.new
+        ]
+      end
     end
 
     it 'puts itself in the stopped state and fires a disconnected event when unbound' do

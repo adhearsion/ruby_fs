@@ -17,9 +17,9 @@ module RubyFS
 
     include Celluloid::IO
 
-    def initialize(host, port, secret, event_callback)
+    def initialize(host, port, secret, event_callback, events = true)
       super()
-      @secret, @event_callback = secret, event_callback
+      @secret, @event_callback, @events = secret, event_callback, events
       @command_callbacks = []
       logger.debug "Starting up..."
       @lexer = Lexer.new method(:receive_request)
@@ -86,7 +86,9 @@ module RubyFS
       when 'command/reply'
         @command_callbacks.pop.call CommandReply.new(headers)
       when 'auth/request'
-        command "auth #{@secret}"
+        command "auth #{@secret}" do
+          command "event json ALL" if @events
+        end
       else
         raise "Unknown request type received (#{headers.inspect})"
       end
