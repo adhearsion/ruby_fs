@@ -118,6 +118,34 @@ Content-Type: text/event-json
       ]
     end
 
+    it 'sends auth requests to the client when the stream is ready' do
+      mocked_server(1, lambda { @stream.send_data 'Foo' }) do |val, server|
+        server.send_data "Content-Type: auth/request\n\n"
+      end
+
+      client_messages.should be == [
+        Stream::Connected.new,
+        Stream::AuthRequest.new,
+        Stream::Disconnected.new
+      ]
+    end
+
+    it 'sends command replies to the client when the stream is ready' do
+      mocked_server(1, lambda { @stream.send_data 'Foo' }) do |val, server|
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+      end
+
+      client_messages.should be == [
+        Stream::Connected.new,
+        CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted'),
+        Stream::Disconnected.new
+      ]
+    end
+
     it 'puts itself in the stopped state and fires a disconnected event when unbound' do
       expect_connected_event
       expect_disconnected_event

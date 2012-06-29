@@ -10,8 +10,9 @@ module RubyFS
       alias :== :eql?
     end
 
-    Connected = Class.new ConnectionStatus
-    Disconnected = Class.new ConnectionStatus
+    Connected     = Class.new ConnectionStatus
+    Disconnected  = Class.new ConnectionStatus
+    AuthRequest   = Class.new ConnectionStatus
 
     include Celluloid::IO
 
@@ -67,17 +68,15 @@ module RubyFS
     end
 
     def receive_request(headers, content)
-      fire_event Event.new(headers_2_hash(headers), json_content_2_hash(content))
-    end
-
-    def headers_2_hash(headers)
-      {}.tap do |hash|
-        headers.each do |h|
-          if /\A([^\s:]+)\s*:\s*/ =~ h
-            tail = $'.dup
-            hash[$1.downcase.gsub(/-/, "_").intern] = tail
-          end
-        end
+      case headers[:content_type]
+      when 'text/event-json'
+        fire_event Event.new(headers, json_content_2_hash(content))
+      when 'command/reply'
+        fire_event CommandReply.new(headers)
+      when 'auth/request'
+        fire_event AuthRequest.new
+      else
+        raise "Unknown request type received (#{headers.inspect})"
       end
     end
 
@@ -190,7 +189,7 @@ module RubyFS
       end
 
       def dispatch_request
-        @callback.call @headers, @content if @callback.respond_to?(:call)
+        @callback.call headers_2_hash(@headers), @content if @callback.respond_to?(:call)
         init_for_request
       end
 
@@ -225,6 +224,17 @@ module RubyFS
 
       def set_binary_mode(size = nil)
         set_text_mode size
+      end
+
+      def headers_2_hash(headers)
+        {}.tap do |hash|
+          headers.each do |h|
+            if /\A([^\s:]+)\s*:\s*/ =~ h
+              tail = $'.dup
+              hash[$1.downcase.gsub(/-/, "_").intern] = tail
+            end
+          end
+        end
       end
     end
   end

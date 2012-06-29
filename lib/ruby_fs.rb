@@ -14,7 +14,9 @@ module RubyFS
 end
 
 %w{
+  command_reply
   event
+  response
   stream
   version
 }.each { |f| require "ruby_fs/#{f}" }
