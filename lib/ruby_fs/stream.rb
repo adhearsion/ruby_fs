@@ -25,7 +25,6 @@ module RubyFS
       @lexer = Lexer.new method(:receive_request)
       @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(host, port)
       post_init
-      run!
     end
 
     [:started, :stopped, :ready].each do |state|

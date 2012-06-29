@@ -29,6 +29,7 @@ module RubyFS
       mock_target.expects(:receive_data).send(*(times ? [:times, times] : [:at_least, 1])).with &block
       s = ServerMock.new '127.0.0.1', server_port, mock_target
       @stream = Stream.new '127.0.0.1', server_port, secret, lambda { |m| client.message_received m }, events
+      @stream.run!
       fake_client.call s if fake_client.respond_to? :call
       s.join
       @stream.join
