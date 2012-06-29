@@ -14,6 +14,7 @@ module RubyFS
 end
 
 %w{
+  event
   stream
   version
 }.each { |f| require "ruby_fs/#{f}" }
