@@ -162,6 +162,56 @@ foo-bar: doo_dah
       end
     end
 
+    it "can send API commands with response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.api('foo') { |reply| handler.call reply } }) do |val, server|
+        val.should == "api foo\n\n"
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+      end
+    end
+
+    it "can send background API commands with response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e', :job_uuid => '4e8344be-c1fe-11e1-a7bf-cf9911a69d1e')
+      mocked_server(1, lambda { |server| @stream.bgapi('foo') { |reply| handler.call reply } }) do |val, server|
+        val.should == "bgapi foo\n\n"
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e
+Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e
+
+)
+      end
+    end
+
+    it "can send messages to calls with options and response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e', :job_uuid => '4e8344be-c1fe-11e1-a7bf-cf9911a69d1e')
+      mocked_server(1, lambda { |server| @stream.sendmsg('aUUID', :call_command => 'execute') { |reply| handler.call reply } }) do |val, server|
+        val.should == %Q(SendMsg aUUID
+call-command: execute
+
+)
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e
+Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e
+
+)
+      end
+    end
+
     it 'authenticates when requested' do
       mocked_server(1, lambda { |server| server.send_data "Content-Type: auth/request\n\n" }) do |val, server|
         val.should == "auth ClueCon\n\n"

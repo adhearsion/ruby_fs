@@ -58,6 +58,18 @@ module RubyFS
       send_data string
     end
 
+    def api(action, &block)
+      command "api #{action}", &block
+    end
+
+    def bgapi(action, &block)
+      command "bgapi #{action}", &block
+    end
+
+    def sendmsg(call, options = {}, &block)
+      command "SendMsg #{call}", options, &block
+    end
+
     def receive_data(data)
       logger.debug "[RECV] #{data}"
       @lexer << data
