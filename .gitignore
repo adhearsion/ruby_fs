@@ -3,7 +3,6 @@
 Gemfile.lock
 pkg/*
 
-lib/ruby_fs/lexer.rb
 .rvmrc
 .yardoc
 doc
