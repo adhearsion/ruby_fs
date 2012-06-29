@@ -46,8 +46,8 @@ module RubyFS
         needed = @textsize - @textpos
         will_take = data.length > needed ? needed : data.length
 
-        @textbuffer << data.byteslice(0...will_take)
-        tail = data.byteslice(will_take..-1)
+        @textbuffer << data[0...will_take]
+        tail = data[will_take..-1]
 
         @textpos += will_take
         if @textpos >= @textsize
