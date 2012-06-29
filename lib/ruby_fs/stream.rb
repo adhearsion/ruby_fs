@@ -20,6 +20,7 @@ module RubyFS
     def initialize(host, port, secret, event_callback)
       super()
       @secret, @event_callback = secret, event_callback
+      @command_callbacks = []
       logger.debug "Starting up..."
       @lexer = Lexer.new method(:receive_request)
       @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(host, port)
@@ -48,6 +49,11 @@ module RubyFS
       @socket.write data.to_s
     end
 
+    def command(command, &block)
+      @command_callbacks << (block || lambda { |reply| logger.debug "Reply to a command (#{command}) without a callback: #{reply.inspect}" })
+      send_data "#{command}\n\n"
+    end
+
     def receive_data(data)
       logger.debug "[RECV] #{data}"
       @lexer << data
@@ -73,9 +79,9 @@ module RubyFS
       when 'text/event-json'
         fire_event Event.new(headers, json_content_2_hash(content))
       when 'command/reply'
-        fire_event CommandReply.new(headers)
+        @command_callbacks.pop.call CommandReply.new(headers)
       when 'auth/request'
-        send_data "auth #{@secret}\n\n"
+        command "auth #{@secret}"
       else
         raise "Unknown request type received (#{headers.inspect})"
       end

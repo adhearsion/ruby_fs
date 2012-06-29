@@ -120,25 +120,42 @@ Content-Type: text/event-json
       ]
     end
 
-    it 'sends command replies to the client when the stream is ready' do
-      mocked_server(1, lambda { |server| @stream.send_data 'Foo' }) do |val, server|
+    it "can send commands with response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.command('foo') { |reply| handler.call reply } }) do |val, server|
+        val.should == "foo\n\n"
         server.send_data %Q(
 Content-Type: command/reply
 Reply-Text: +OK accepted
 
 )
       end
+    end
 
-      client_messages.should be == [
-        Stream::Connected.new,
-        CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted'),
-        Stream::Disconnected.new
-      ]
+    it "can send commands without response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      mocked_server(1, lambda { |server| @stream.command 'foo' }) do |val, server|
+        val.should == "foo\n\n"
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+      end
     end
 
     it 'authenticates when requested' do
       mocked_server(1, lambda { |server| server.send_data "Content-Type: auth/request\n\n" }) do |val, server|
         val.should == "auth ClueCon\n\n"
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
       end
 
       client_messages.should be == [
