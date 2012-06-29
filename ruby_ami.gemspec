@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency %q<celluloid-io>, ["~> 0.11.0"]
   s.add_runtime_dependency %q<future-resource>, [">= 0"]
   s.add_runtime_dependency %q<countdownlatch>, ["~> 1.0"]
-  s.add_runtime_dependency %q<json-jruby> if RUBY_PLATFORM =~ /java/
+  s.add_runtime_dependency %q<json>
 
   s.add_development_dependency %q<bundler>, ["~> 1.0"]
   s.add_development_dependency %q<rspec>, [">= 2.5.0"]
