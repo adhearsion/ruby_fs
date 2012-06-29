@@ -52,7 +52,7 @@ module RubyFS
       @command_callbacks << (block || lambda { |reply| logger.debug "Reply to a command (#{command}) without a callback: #{reply.inspect}" })
       string = "#{command}\n"
       options.each_pair do |key, value|
-        string << "#{key.to_s.gsub '_', '-'}: #{value}\n"
+        string << "#{key.to_s.gsub '_', '-'}: #{value}\n" if value
       end
       string << "\n"
       send_data string
@@ -68,6 +68,10 @@ module RubyFS
 
     def sendmsg(call, options = {}, &block)
       command "SendMsg #{call}", options, &block
+    end
+
+    def application(call, appname, options = nil, &block)
+      sendmsg call, :call_command => 'execute', :execute_app_name => appname, :execute_app_arg => options, &block
     end
 
     def receive_data(data)

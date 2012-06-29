@@ -197,7 +197,7 @@ Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e
       expect_connected_event
       expect_disconnected_event
       handler = mock
-      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e', :job_uuid => '4e8344be-c1fe-11e1-a7bf-cf9911a69d1e')
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
       mocked_server(1, lambda { |server| @stream.sendmsg('aUUID', :call_command => 'execute') { |reply| handler.call reply } }) do |val, server|
         val.should == %Q(SendMsg aUUID
 call-command: execute
@@ -205,8 +205,46 @@ call-command: execute
 )
         server.send_data %Q(
 Content-Type: command/reply
-Reply-Text: +OK Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e
-Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e
+Reply-Text: +OK accepted
+
+)
+      end
+    end
+
+    it "can execute applications on calls without options but with response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.application('aUUID', 'answer') { |reply| handler.call reply } }) do |val, server|
+        val.should == %Q(SendMsg aUUID
+call-command: execute
+execute-app-name: answer
+
+)
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+      end
+    end
+
+    it "can execute applications on calls with options and response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.application('aUUID', 'playback', '/tmp/test.wav') { |reply| handler.call reply } }) do |val, server|
+        val.should == %Q(SendMsg aUUID
+call-command: execute
+execute-app-name: playback
+execute-app-arg: /tmp/test.wav
+
+)
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
 
 )
       end
