@@ -14,13 +14,12 @@ module RubyFS
 
     Connected     = Class.new ConnectionStatus
     Disconnected  = Class.new ConnectionStatus
-    AuthRequest   = Class.new ConnectionStatus
 
     include Celluloid::IO
 
-    def initialize(host, port, event_callback)
+    def initialize(host, port, secret, event_callback)
       super()
-      @event_callback = event_callback
+      @secret, @event_callback = secret, event_callback
       logger.debug "Starting up..."
       @lexer = Lexer.new method(:receive_request)
       @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(host, port)
@@ -76,7 +75,7 @@ module RubyFS
       when 'command/reply'
         fire_event CommandReply.new(headers)
       when 'auth/request'
-        fire_event AuthRequest.new
+        send_data "auth #{@secret}\n\n"
       else
         raise "Unknown request type received (#{headers.inspect})"
       end

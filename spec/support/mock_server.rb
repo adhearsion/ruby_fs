@@ -4,7 +4,6 @@ class ServerMock
   include Celluloid::IO
 
   def initialize(host, port, mock_target = MockServer.new)
-    puts "*** Starting echo server on #{host}:#{port}"
     @server = TCPServer.new host, port
     @mock_target = mock_target
     @clients = []
@@ -18,14 +17,14 @@ class ServerMock
   end
 
   def run
-    after(0.5) { terminate }
+    after(1) { terminate }
     loop { handle_connection! @server.accept }
   end
 
   def handle_connection(socket)
     @clients << socket
     _, port, host = socket.peeraddr
-    puts "*** Received connection from #{host}:#{port}"
+    Logger.debug "MockServer Received connection from #{host}:#{port}"
     loop { receive_data socket.readpartial(4096) }
   end
 

@@ -21,12 +21,14 @@ module RubyFS
       messages
     end
 
+    let(:secret) { 'ClueCon' }
+
     def mocked_server(times = nil, fake_client = nil, &block)
       mock_target = MockServer.new
       mock_target.expects(:receive_data).send(*(times ? [:times, times] : [:at_least, 1])).with &block
       s = ServerMock.new '127.0.0.1', server_port, mock_target
-      @stream = Stream.new '127.0.0.1', server_port, lambda { |m| client.message_received m }
-      fake_client.call if fake_client.respond_to? :call
+      @stream = Stream.new '127.0.0.1', server_port, secret, lambda { |m| client.message_received m }
+      fake_client.call s if fake_client.respond_to? :call
       s.join
       @stream.join
     end
@@ -53,14 +55,14 @@ module RubyFS
       it "can send data" do
         expect_connected_event
         expect_disconnected_event
-        mocked_server(1, lambda { @stream.send_data "foo" }) do |val, server|
+        mocked_server(1, lambda { |server| @stream.send_data "foo" }) do |val, server|
           val.should == "foo"
         end
       end
     end
 
     it 'sends events to the client when the stream is ready' do
-      mocked_server(1, lambda { @stream.send_data 'Foo' }) do |val, server|
+      mocked_server(1, lambda { |server| @stream.send_data 'Foo' }) do |val, server|
         server.send_data %Q(
 Content-Length: 776
 Content-Type: text/event-json
@@ -118,20 +120,8 @@ Content-Type: text/event-json
       ]
     end
 
-    it 'sends auth requests to the client when the stream is ready' do
-      mocked_server(1, lambda { @stream.send_data 'Foo' }) do |val, server|
-        server.send_data "Content-Type: auth/request\n\n"
-      end
-
-      client_messages.should be == [
-        Stream::Connected.new,
-        Stream::AuthRequest.new,
-        Stream::Disconnected.new
-      ]
-    end
-
     it 'sends command replies to the client when the stream is ready' do
-      mocked_server(1, lambda { @stream.send_data 'Foo' }) do |val, server|
+      mocked_server(1, lambda { |server| @stream.send_data 'Foo' }) do |val, server|
         server.send_data %Q(
 Content-Type: command/reply
 Reply-Text: +OK accepted
@@ -146,10 +136,21 @@ Reply-Text: +OK accepted
       ]
     end
 
+    it 'authenticates when requested' do
+      mocked_server(1, lambda { |server| server.send_data "Content-Type: auth/request\n\n" }) do |val, server|
+        val.should == "auth ClueCon\n\n"
+      end
+
+      client_messages.should be == [
+        Stream::Connected.new,
+        Stream::Disconnected.new
+      ]
+    end
+
     it 'puts itself in the stopped state and fires a disconnected event when unbound' do
       expect_connected_event
       expect_disconnected_event
-      mocked_server(1, lambda { @stream.send_data 'Foo' }) do |val, server|
+      mocked_server(1, lambda { |server| @stream.send_data 'Foo' }) do |val, server|
         @stream.stopped?.should be false
       end
       @stream.alive?.should be false
