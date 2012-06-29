@@ -35,7 +35,7 @@ class ServerMock
   end
 
   def send_data(data)
-    @clients.each { |client| client.write data.gsub("\n", "\r\n") }
+    @clients.each { |client| client.write data }
   end
 end
 

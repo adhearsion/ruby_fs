@@ -17,8 +17,6 @@ module RubyFS
     def receive_data(data)
       return unless data && data.length > 0
 
-      data = data.gsub "\r", ''
-
       case @data_mode
       when :lines
         receive_line_data data
