@@ -49,9 +49,14 @@ module RubyFS
       @socket.write data.to_s
     end
 
-    def command(command, &block)
+    def command(command, options = {}, &block)
       @command_callbacks << (block || lambda { |reply| logger.debug "Reply to a command (#{command}) without a callback: #{reply.inspect}" })
-      send_data "#{command}\n\n"
+      string = "#{command}\n"
+      options.each_pair do |key, value|
+        string << "#{key.to_s.gsub '_', '-'}: #{value}\n"
+      end
+      string << "\n"
+      send_data string
     end
 
     def receive_data(data)
