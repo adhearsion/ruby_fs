@@ -23,9 +23,12 @@ module RubyFS
       its(:headers) { should == {} }
       its(:content) { should == content }
 
-      it "makes content values available as method calls" do
-        subject.should respond_to(:foo)
-        subject.foo.should == 'bar'
+      it "makes content values available via #[]" do
+        subject.should_not have_key(:bar)
+        subject[:bar].should == nil
+
+        subject.should have_key(:foo)
+        subject[:foo].should == 'bar'
       end
     end
 
