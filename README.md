@@ -8,11 +8,7 @@ RubyFS is a FreeSWITCH EventSocket client library in Ruby and based on Celluloid
 ```ruby
 require 'ruby_fs'
 
-client = RubyFS::Client.new :password       => 'ClueCon',
-                            :host           => '127.0.0.1',
-                            :port           => 8021,
-                            :event_handler  => lambda { |e| p e },
-                            :logger         => Logger.new('ruby_fs.log')
+client = RubyFS::Stream.new '127.0.0.1', 8021, 'ClueCon', lambda { |e| p e }
 
 client.start
 ```
