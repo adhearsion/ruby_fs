@@ -17,7 +17,7 @@ client = RubyFS::Client.new :password       => 'ClueCon',
 client.start
 ```
 
-## Links:
+## Links
 * [Source](https://github.com/adhearsion/ruby_fs)
 * [Documentation](http://rdoc.info/github/adhearsion/ruby_fs/master/frames)
 * [Bug Tracker](https://github.com/adhearsion/ruby_fs/issues)
