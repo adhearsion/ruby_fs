@@ -19,63 +19,139 @@ module RubyFS
 
     def initialize(host, port, secret, event_callback, events = true)
       super()
-      @secret, @event_callback, @events = secret, event_callback, events
+      @host, @port, @secret, @event_callback, @events = host, port, secret, event_callback, events
       @command_callbacks = []
-      logger.debug "Starting up..."
       @lexer = Lexer.new method(:receive_request)
-      @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(host, port)
-      post_init
     end
 
     [:started, :stopped, :ready].each do |state|
       define_method("#{state}?") { @state == state }
     end
 
+    #
+    # Connect to the server and begin handling data
     def run
+      logger.debug "Starting up..."
+      @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(@host, @port)
+      post_init
       loop { receive_data @socket.readpartial(4096) }
-    rescue EOFError
+    rescue EOFError, IOError
       logger.info "Client socket closed!"
-      current_actor.terminate!
+      terminate
     end
 
-    def post_init
-      @state = :started
-      fire_event Connected.new
-    end
-
+    #
+    # Send raw string data to the FS server
+    #
+    # @param [#to_s] data the data to send over the socket
     def send_data(data)
-      logger.debug "[SEND] #{data.to_s}"
+      logger.trace "[SEND] #{data.to_s}"
       @socket.write data.to_s
     end
 
+    #
+    # Send a FreeSWITCH command with options and a callback for the response
+    #
+    # @param [#to_s] command the command to run
+    # @param [optional, Hash] options the command's options, where keys have _ substituted for -
+    #
+    # @yield [response] Handle the command's response
+    # @yieldparam [RubyFS::Response] response the command's response object
     def command(command, options = {}, &block)
       @command_callbacks << (block || lambda { |reply| logger.debug "Reply to a command (#{command}) without a callback: #{reply.inspect}" })
       string = "#{command}\n"
       options.each_pair do |key, value|
-        string << "#{key.to_s.gsub '_', '-'}: #{value}\n"
+        string << "#{key.to_s.gsub '_', '-'}: #{value}\n" if value
       end
       string << "\n"
       send_data string
     end
 
-    def receive_data(data)
-      logger.debug "[RECV] #{data}"
-      @lexer << data
+    #
+    # Send an API action
+    #
+    # @param [#to_s] action the API action to execute
+    #
+    # @yield [response] Handle the command's response
+    # @yieldparam [RubyFS::Response] response the command's response object
+    def api(action, &block)
+      command "api #{action}", &block
     end
 
+    #
+    # Send an API action in the background
+    #
+    # @param [#to_s] action the API action to execute
+    #
+    # @yield [response] Handle the command's response
+    # @yieldparam [RubyFS::Response] response the command's response object
+    def bgapi(action, &block)
+      command "bgapi #{action}", &block
+    end
+
+    #
+    # Send a message to a particular call
+    #
+    # @param [#to_s] call the call ID to send the message to
+    # @param [optional, Hash] options the message options
+    #
+    # @yield [response] Handle the message's response
+    # @yieldparam [RubyFS::Response] response the message's response object
+    def sendmsg(call, options = {}, &block)
+      command "SendMsg #{call}", options, &block
+    end
+
+    #
+    # Execute an application on a particular call
+    #
+    # @param [#to_s] call the call ID on which to execute the application
+    # @param [#to_s] appname the app to execute
+    # @param [optional, String] options the application options
+    #
+    # @yield [response] Handle the application's response
+    # @yieldparam [RubyFS::Response] response the application's response object
+    def application(call, appname, options = nil, &block)
+      sendmsg call, :call_command => 'execute', :execute_app_name => appname, :execute_app_arg => options, &block
+    end
+
+    #
+    # Shutdown the stream and disconnect from the socket
+    def shutdown
+      @socket.close if @socket
+    end
+
+    # @private
     def finalize
       logger.debug "Finalizing stream"
-      @socket.close if @socket
       @state = :stopped
       fire_event Disconnected.new
     end
 
+    #
+    # Fire an event to the specified callback
+    #
+    # @param [Object] event the event to fire
     def fire_event(event)
       @event_callback.call event
     end
 
+    #
+    # The stream's logger object
     def logger
-      Logger
+      super
+    rescue
+      @logger ||= begin
+        logger = Logger
+        logger.define_singleton_method :trace, logger.method(:debug)
+        logger
+      end
+    end
+
+    private
+
+    def receive_data(data)
+      logger.trace "[RECV] #{data}"
+      @lexer << data
     end
 
     def receive_request(headers, content)
@@ -100,6 +176,11 @@ module RubyFS
           hash[k.downcase.gsub(/-/,"_").intern] = v
         end
       end
+    end
+
+    def post_init
+      @state = :started
+      fire_event Connected.new
     end
   end
 end

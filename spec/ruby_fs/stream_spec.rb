@@ -30,6 +30,7 @@ module RubyFS
       s = ServerMock.new '127.0.0.1', server_port, mock_target
       @stream = Stream.new '127.0.0.1', server_port, secret, lambda { |m| client.message_received m }, events
       @stream.run!
+      sleep 0.1
       fake_client.call s if fake_client.respond_to? :call
       s.join
       @stream.join
@@ -50,7 +51,7 @@ module RubyFS
         expect_connected_event
         expect_disconnected_event
         mocked_server(0) do |val, server|
-          @stream.started?.should be_true
+          @stream.should be_started
         end
       end
 
@@ -60,6 +61,15 @@ module RubyFS
         mocked_server(1, lambda { |server| @stream.send_data "foo" }) do |val, server|
           val.should == "foo"
         end
+      end
+
+      it "can be shut down" do
+        expect_connected_event
+        expect_disconnected_event
+        mocked_server(0, lambda { |server| @stream.shutdown }) do |val, server|
+          @stream.should be_started
+        end
+        @stream.should_not be_alive
       end
     end
 
@@ -157,6 +167,94 @@ Reply-Text: +OK accepted
         val.should == %Q(foo
 one: 1
 foo-bar: doo_dah
+
+)
+      end
+    end
+
+    it "can send API commands with response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.api('foo') { |reply| handler.call reply } }) do |val, server|
+        val.should == "api foo\n\n"
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+      end
+    end
+
+    it "can send background API commands with response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e', :job_uuid => '4e8344be-c1fe-11e1-a7bf-cf9911a69d1e')
+      mocked_server(1, lambda { |server| @stream.bgapi('foo') { |reply| handler.call reply } }) do |val, server|
+        val.should == "bgapi foo\n\n"
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e
+Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e
+
+)
+      end
+    end
+
+    it "can send messages to calls with options and response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.sendmsg('aUUID', :call_command => 'execute') { |reply| handler.call reply } }) do |val, server|
+        val.should == %Q(SendMsg aUUID
+call-command: execute
+
+)
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+      end
+    end
+
+    it "can execute applications on calls without options but with response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.application('aUUID', 'answer') { |reply| handler.call reply } }) do |val, server|
+        val.should == %Q(SendMsg aUUID
+call-command: execute
+execute-app-name: answer
+
+)
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+      end
+    end
+
+    it "can execute applications on calls with options and response callbacks" do
+      expect_connected_event
+      expect_disconnected_event
+      handler = mock
+      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.application('aUUID', 'playback', '/tmp/test.wav') { |reply| handler.call reply } }) do |val, server|
+        val.should == %Q(SendMsg aUUID
+call-command: execute
+execute-app-name: playback
+execute-app-arg: /tmp/test.wav
+
+)
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
 
 )
       end
