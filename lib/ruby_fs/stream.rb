@@ -24,7 +24,6 @@ module RubyFS
       logger.debug "Starting up..."
       @lexer = Lexer.new method(:receive_request)
       @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(host, port)
-      post_init
     end
 
     [:started, :stopped, :ready].each do |state|
@@ -32,6 +31,7 @@ module RubyFS
     end
 
     def run
+      post_init
       loop { receive_data @socket.readpartial(4096) }
     rescue EOFError, IOError
       logger.info "Client socket closed!"
