@@ -44,7 +44,7 @@ module RubyFS
     end
 
     def send_data(data)
-      logger.debug "[SEND] #{data.to_s}"
+      logger.trace "[SEND] #{data.to_s}"
       @socket.write data.to_s
     end
 
@@ -75,7 +75,7 @@ module RubyFS
     end
 
     def receive_data(data)
-      logger.debug "[RECV] #{data}"
+      logger.trace "[RECV] #{data}"
       @lexer << data
     end
 
@@ -91,7 +91,13 @@ module RubyFS
     end
 
     def logger
-      Logger
+      super
+    rescue
+      @logger ||= begin
+        logger = Logger
+        logger.define_singleton_method :trace, logger.method(:debug)
+        logger
+      end
     end
 
     def receive_request(headers, content)
