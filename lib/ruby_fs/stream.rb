@@ -38,11 +38,6 @@ module RubyFS
       terminate
     end
 
-    def post_init
-      @state = :started
-      fire_event Connected.new
-    end
-
     def send_data(data)
       logger.trace "[SEND] #{data.to_s}"
       @socket.write data.to_s
@@ -74,11 +69,6 @@ module RubyFS
       sendmsg call, :call_command => 'execute', :execute_app_name => appname, :execute_app_arg => options, &block
     end
 
-    def receive_data(data)
-      logger.trace "[RECV] #{data}"
-      @lexer << data
-    end
-
     def shutdown
       @socket.close if @socket
     end
@@ -103,6 +93,13 @@ module RubyFS
       end
     end
 
+    private
+
+    def receive_data(data)
+      logger.trace "[RECV] #{data}"
+      @lexer << data
+    end
+
     def receive_request(headers, content)
       case headers[:content_type]
       when 'text/event-json'
@@ -125,6 +122,11 @@ module RubyFS
           hash[k.downcase.gsub(/-/,"_").intern] = v
         end
       end
+    end
+
+    def post_init
+      @state = :started
+      fire_event Connected.new
     end
   end
 end
