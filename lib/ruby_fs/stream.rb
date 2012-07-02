@@ -19,11 +19,9 @@ module RubyFS
 
     def initialize(host, port, secret, event_callback, events = true)
       super()
-      @secret, @event_callback, @events = secret, event_callback, events
+      @host, @port, @secret, @event_callback, @events = host, port, secret, event_callback, events
       @command_callbacks = []
-      logger.debug "Starting up..."
       @lexer = Lexer.new method(:receive_request)
-      @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(host, port)
     end
 
     [:started, :stopped, :ready].each do |state|
@@ -31,6 +29,8 @@ module RubyFS
     end
 
     def run
+      logger.debug "Starting up..."
+      @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(@host, @port)
       post_init
       loop { receive_data @socket.readpartial(4096) }
     rescue EOFError, IOError
