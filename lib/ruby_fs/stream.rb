@@ -33,9 +33,9 @@ module RubyFS
 
     def run
       loop { receive_data @socket.readpartial(4096) }
-    rescue EOFError
+    rescue EOFError, IOError
       logger.info "Client socket closed!"
-      current_actor.terminate!
+      terminate
     end
 
     def post_init
@@ -79,9 +79,12 @@ module RubyFS
       @lexer << data
     end
 
+    def shutdown
+      @socket.close if @socket
+    end
+
     def finalize
       logger.debug "Finalizing stream"
-      @socket.close if @socket
       @state = :stopped
       fire_event Disconnected.new
     end

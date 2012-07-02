@@ -26,6 +26,8 @@ class ServerMock
     _, port, host = socket.peeraddr
     Logger.debug "MockServer Received connection from #{host}:#{port}"
     loop { receive_data socket.readpartial(4096) }
+  rescue EOFError
+    Logger.debug "Connection from #{host}:#{port} closed"
   end
 
   def receive_data(data)

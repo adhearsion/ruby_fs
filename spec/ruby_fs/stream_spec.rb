@@ -50,7 +50,7 @@ module RubyFS
         expect_connected_event
         expect_disconnected_event
         mocked_server(0) do |val, server|
-          @stream.started?.should be_true
+          @stream.should be_started
         end
       end
 
@@ -60,6 +60,15 @@ module RubyFS
         mocked_server(1, lambda { |server| @stream.send_data "foo" }) do |val, server|
           val.should == "foo"
         end
+      end
+
+      it "can be shut down" do
+        expect_connected_event
+        expect_disconnected_event
+        mocked_server(0, lambda { |server| @stream.shutdown }) do |val, server|
+          @stream.should be_started
+        end
+        @stream.should_not be_alive
       end
     end
 
