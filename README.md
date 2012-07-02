@@ -8,9 +8,13 @@ RubyFS is a FreeSWITCH EventSocket client library in Ruby and based on Celluloid
 ```ruby
 require 'ruby_fs'
 
-client = RubyFS::Stream.new '127.0.0.1', 8021, 'ClueCon', lambda { |e| p e }
+stream = RubyFS::Stream.new '127.0.0.1', 8021, 'ClueCon', lambda { |e| p e }
 
-client.start
+stream.run
+
+stream.api 'originate sofia/mydomain.com/ext@yourvsp.com 1000' do |response|
+  puts "Originate response was #{response.inspect}"
+end
 ```
 
 ## Links

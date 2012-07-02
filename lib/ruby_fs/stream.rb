@@ -28,6 +28,8 @@ module RubyFS
       define_method("#{state}?") { @state == state }
     end
 
+    #
+    # Connect to the server and begin handling data
     def run
       logger.debug "Starting up..."
       @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(@host, @port)
@@ -38,11 +40,23 @@ module RubyFS
       terminate
     end
 
+    #
+    # Send raw string data to the FS server
+    #
+    # @param [#to_s] data the data to send over the socket
     def send_data(data)
       logger.trace "[SEND] #{data.to_s}"
       @socket.write data.to_s
     end
 
+    #
+    # Send a FreeSWITCH command with options and a callback for the response
+    #
+    # @param [#to_s] command the command to run
+    # @param [optional, Hash] options the command's options, where keys have _ substituted for -
+    #
+    # @yield [response] Handle the command's response
+    # @yieldparam [RubyFS::Response] response the command's response object
     def command(command, options = {}, &block)
       @command_callbacks << (block || lambda { |reply| logger.debug "Reply to a command (#{command}) without a callback: #{reply.inspect}" })
       string = "#{command}\n"
@@ -53,36 +67,76 @@ module RubyFS
       send_data string
     end
 
+    #
+    # Send an API action
+    #
+    # @param [#to_s] action the API action to execute
+    #
+    # @yield [response] Handle the command's response
+    # @yieldparam [RubyFS::Response] response the command's response object
     def api(action, &block)
       command "api #{action}", &block
     end
 
+    #
+    # Send an API action in the background
+    #
+    # @param [#to_s] action the API action to execute
+    #
+    # @yield [response] Handle the command's response
+    # @yieldparam [RubyFS::Response] response the command's response object
     def bgapi(action, &block)
       command "bgapi #{action}", &block
     end
 
+    #
+    # Send a message to a particular call
+    #
+    # @param [#to_s] call the call ID to send the message to
+    # @param [optional, Hash] options the message options
+    #
+    # @yield [response] Handle the message's response
+    # @yieldparam [RubyFS::Response] response the message's response object
     def sendmsg(call, options = {}, &block)
       command "SendMsg #{call}", options, &block
     end
 
+    #
+    # Execute an application on a particular call
+    #
+    # @param [#to_s] call the call ID on which to execute the application
+    # @param [#to_s] appname the app to execute
+    # @param [optional, String] options the application options
+    #
+    # @yield [response] Handle the application's response
+    # @yieldparam [RubyFS::Response] response the application's response object
     def application(call, appname, options = nil, &block)
       sendmsg call, :call_command => 'execute', :execute_app_name => appname, :execute_app_arg => options, &block
     end
 
+    #
+    # Shutdown the stream and disconnect from the socket
     def shutdown
       @socket.close if @socket
     end
 
+    # @private
     def finalize
       logger.debug "Finalizing stream"
       @state = :stopped
       fire_event Disconnected.new
     end
 
+    #
+    # Fire an event to the specified callback
+    #
+    # @param [Object] event the event to fire
     def fire_event(event)
       @event_callback.call event
     end
 
+    #
+    # The stream's logger object
     def logger
       super
     rescue
