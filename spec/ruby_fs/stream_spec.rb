@@ -132,25 +132,11 @@ Content-Type: text/event-json
       ]
     end
 
-    it "can send commands with response callbacks" do
+    it "can send commands and returns the response" do
       expect_connected_event
       expect_disconnected_event
-      handler = mock
-      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
-      mocked_server(1, lambda { |server| @stream.command('foo') { |reply| handler.call reply } }) do |val, server|
-        val.should == "foo\n\n"
-        server.send_data %Q(
-Content-Type: command/reply
-Reply-Text: +OK accepted
-
-)
-      end
-    end
-
-    it "can send commands without response callbacks" do
-      expect_connected_event
-      expect_disconnected_event
-      mocked_server(1, lambda { |server| @stream.command 'foo' }) do |val, server|
+      reply = CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.command('foo').should == reply }) do |val, server|
         val.should == "foo\n\n"
         server.send_data %Q(
 Content-Type: command/reply
@@ -163,7 +149,7 @@ Reply-Text: +OK accepted
     it "can send commands with options" do
       expect_connected_event
       expect_disconnected_event
-      mocked_server(1, lambda { |server| @stream.command 'foo', :one => 1, :foo_bar => :doo_dah }) do |val, server|
+      mocked_server(1, lambda { |server| @stream.command! 'foo', :one => 1, :foo_bar => :doo_dah }) do |val, server|
         val.should == %Q(foo
 one: 1
 foo-bar: doo_dah
@@ -172,12 +158,11 @@ foo-bar: doo_dah
       end
     end
 
-    it "can send API commands with response callbacks" do
+    it "can send API commands and returns the response" do
       expect_connected_event
       expect_disconnected_event
-      handler = mock
-      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
-      mocked_server(1, lambda { |server| @stream.api('foo') { |reply| handler.call reply } }) do |val, server|
+      reply = CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.api('foo').should == reply }) do |val, server|
         val.should == "api foo\n\n"
         server.send_data %Q(
 Content-Type: command/reply
@@ -187,12 +172,11 @@ Reply-Text: +OK accepted
       end
     end
 
-    it "can send background API commands with response callbacks" do
+    it "can send background API commands and returns the response" do
       expect_connected_event
       expect_disconnected_event
-      handler = mock
-      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e', :job_uuid => '4e8344be-c1fe-11e1-a7bf-cf9911a69d1e')
-      mocked_server(1, lambda { |server| @stream.bgapi('foo') { |reply| handler.call reply } }) do |val, server|
+      reply = CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e', :job_uuid => '4e8344be-c1fe-11e1-a7bf-cf9911a69d1e')
+      mocked_server(1, lambda { |server| @stream.bgapi('foo').should == reply }) do |val, server|
         val.should == "bgapi foo\n\n"
         server.send_data %Q(
 Content-Type: command/reply
@@ -203,12 +187,11 @@ Job-UUID: 4e8344be-c1fe-11e1-a7bf-cf9911a69d1e
       end
     end
 
-    it "can send messages to calls with options and response callbacks" do
+    it "can send messages to calls with options and returns the response" do
       expect_connected_event
       expect_disconnected_event
-      handler = mock
-      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
-      mocked_server(1, lambda { |server| @stream.sendmsg('aUUID', :call_command => 'execute') { |reply| handler.call reply } }) do |val, server|
+      reply = CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.sendmsg('aUUID', :call_command => 'execute').should == reply }) do |val, server|
         val.should == %Q(SendMsg aUUID
 call-command: execute
 
@@ -221,12 +204,11 @@ Reply-Text: +OK accepted
       end
     end
 
-    it "can execute applications on calls without options but with response callbacks" do
+    it "can execute applications on calls without options and returns the response" do
       expect_connected_event
       expect_disconnected_event
-      handler = mock
-      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
-      mocked_server(1, lambda { |server| @stream.application('aUUID', 'answer') { |reply| handler.call reply } }) do |val, server|
+      reply = CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.application('aUUID', 'answer').should == reply }) do |val, server|
         val.should == %Q(SendMsg aUUID
 call-command: execute
 execute-app-name: answer
@@ -240,12 +222,11 @@ Reply-Text: +OK accepted
       end
     end
 
-    it "can execute applications on calls with options and response callbacks" do
+    it "can execute applications on calls with options and returns the response" do
       expect_connected_event
       expect_disconnected_event
-      handler = mock
-      handler.expects(:call).once.with CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
-      mocked_server(1, lambda { |server| @stream.application('aUUID', 'playback', '/tmp/test.wav') { |reply| handler.call reply } }) do |val, server|
+      reply = CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      mocked_server(1, lambda { |server| @stream.application('aUUID', 'playback', '/tmp/test.wav').should == reply }) do |val, server|
         val.should == %Q(SendMsg aUUID
 call-command: execute
 execute-app-name: playback
