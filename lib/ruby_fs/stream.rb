@@ -55,16 +55,17 @@ module RubyFS
     # @param [#to_s] command the command to run
     # @param [optional, Hash] options the command's options, where keys have _ substituted for -
     #
-    # @yield [response] Handle the command's response
-    # @yieldparam [RubyFS::Response] response the command's response object
-    def command(command, options = {}, &block)
-      @command_callbacks << (block || lambda { |reply| logger.debug "Reply to a command (#{command}) without a callback: #{reply.inspect}" })
+    # @return [RubyFS::Response] response the command's response object
+    def command(command, options = {}, &callback)
+      uuid = SecureRandom.uuid
+      @command_callbacks << (callback || lambda { |reply| signal uuid, reply })
       string = "#{command}\n"
       options.each_pair do |key, value|
         string << "#{key.to_s.gsub '_', '-'}: #{value}\n" if value
       end
       string << "\n"
       send_data string
+      wait uuid unless callback
     end
 
     #
@@ -72,10 +73,9 @@ module RubyFS
     #
     # @param [#to_s] action the API action to execute
     #
-    # @yield [response] Handle the command's response
-    # @yieldparam [RubyFS::Response] response the command's response object
-    def api(action, &block)
-      command "api #{action}", &block
+    # @return [RubyFS::Response] response the command's response object
+    def api(action)
+      command "api #{action}"
     end
 
     #
@@ -83,10 +83,9 @@ module RubyFS
     #
     # @param [#to_s] action the API action to execute
     #
-    # @yield [response] Handle the command's response
-    # @yieldparam [RubyFS::Response] response the command's response object
-    def bgapi(action, &block)
-      command "bgapi #{action}", &block
+    # @return [RubyFS::Response] response the command's response object
+    def bgapi(action)
+      command "bgapi #{action}"
     end
 
     #
@@ -95,10 +94,9 @@ module RubyFS
     # @param [#to_s] call the call ID to send the message to
     # @param [optional, Hash] options the message options
     #
-    # @yield [response] Handle the message's response
-    # @yieldparam [RubyFS::Response] response the message's response object
-    def sendmsg(call, options = {}, &block)
-      command "SendMsg #{call}", options, &block
+    # @return [RubyFS::Response] response the message's response object
+    def sendmsg(call, options = {})
+      command "SendMsg #{call}", options
     end
 
     #
@@ -108,10 +106,9 @@ module RubyFS
     # @param [#to_s] appname the app to execute
     # @param [optional, String] options the application options
     #
-    # @yield [response] Handle the application's response
-    # @yieldparam [RubyFS::Response] response the application's response object
-    def application(call, appname, options = nil, &block)
-      sendmsg call, :call_command => 'execute', :execute_app_name => appname, :execute_app_arg => options, &block
+    # @return [RubyFS::Response] response the application's response object
+    def application(call, appname, options = nil)
+      sendmsg call, :call_command => 'execute', :execute_app_name => appname, :execute_app_arg => options
     end
 
     #
@@ -162,7 +159,7 @@ module RubyFS
         @command_callbacks.pop.call CommandReply.new(headers)
       when 'auth/request'
         command "auth #{@secret}" do
-          command "event json ALL" if @events
+          command! "event json ALL" if @events
         end
       else
         raise "Unknown request type received (#{headers.inspect})"

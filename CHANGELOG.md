@@ -1,4 +1,5 @@
 # develop
+  * Feature/Change: Switch command methods from yielding the result asynchronously to returning it synchronously. Allows for better actor usage (async/futures)
 
 # 0.2.0
   * Feature: Common command helper methods
