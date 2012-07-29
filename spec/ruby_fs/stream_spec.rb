@@ -306,6 +306,17 @@ Reply-Text: +OK accepted
       end
     end
 
+    context 'when receiving a disconnect notice' do
+      it 'puts itself in the stopped state and fires a disconnected event' do
+        expect_connected_event
+        expect_disconnected_event
+        mocked_server(0, lambda { |server| server.send_data "Content-Type: text/disconnect-notice\n\n" }) do |val, server|
+          @stream.stopped?.should be false
+        end
+        @stream.alive?.should be false
+      end
+    end
+
     it 'puts itself in the stopped state and fires a disconnected event when unbound' do
       expect_connected_event
       expect_disconnected_event
