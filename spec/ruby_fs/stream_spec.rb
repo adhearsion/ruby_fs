@@ -4,6 +4,10 @@ module RubyFS
   describe Stream do
     let(:server_port) { 50000 - rand(1000) }
 
+    def client
+      @client ||= mock('Client')
+    end
+
     before do
       def client.message_received(message)
         @messages ||= Queue.new
