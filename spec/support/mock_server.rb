@@ -39,7 +39,3 @@ class ServerMock
     @clients.each { |client| client.write data }
   end
 end
-
-def client
-  @client ||= mock('Client')
-end

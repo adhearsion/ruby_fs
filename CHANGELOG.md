@@ -1,5 +1,8 @@
 # develop
 
+# 0.3.1
+  * Bugfix: Disconnect notices are successfully handled
+
 # 0.3.0
   * Feature/Change: Switch command methods from yielding the result asynchronously to returning it synchronously. Allows for better actor usage (async/futures)
 

@@ -8,6 +8,5 @@ pkg/*
 doc
 coverage
 spec/reports
-features/reports
 vendor
 *.swp

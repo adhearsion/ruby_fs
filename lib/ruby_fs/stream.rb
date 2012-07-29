@@ -161,6 +161,8 @@ module RubyFS
         command "auth #{@secret}" do
           command! "event json ALL" if @events
         end
+      when 'text/disconnect-notice'
+        terminate
       else
         raise "Unknown request type received (#{headers.inspect})"
       end

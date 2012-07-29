@@ -4,6 +4,10 @@ module RubyFS
   describe Stream do
     let(:server_port) { 50000 - rand(1000) }
 
+    def client
+      @client ||= mock('Client')
+    end
+
     before do
       def client.message_received(message)
         @messages ||= Queue.new
@@ -303,6 +307,17 @@ Reply-Text: +OK accepted
           Stream::Connected.new,
           Stream::Disconnected.new
         ]
+      end
+    end
+
+    context 'when receiving a disconnect notice' do
+      it 'puts itself in the stopped state and fires a disconnected event' do
+        expect_connected_event
+        expect_disconnected_event
+        mocked_server(0, lambda { |server| server.send_data "Content-Type: text/disconnect-notice\n\n" }) do |val, server|
+          @stream.stopped?.should be false
+        end
+        @stream.alive?.should be false
       end
     end
 
