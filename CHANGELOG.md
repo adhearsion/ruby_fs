@@ -1,4 +1,6 @@
 # develop
+
+# 0.3.1
   * Bugfix: Disconnect notices are successfully handled
 
 # 0.3.0
