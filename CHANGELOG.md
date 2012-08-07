@@ -1,4 +1,5 @@
 # develop
+  * Bugfix: Handle refused connections to FreeSWITCH
 
 # 0.3.1
   * Bugfix: Disconnect notices are successfully handled
