@@ -1,4 +1,7 @@
 # develop
+
+# 1.0.0
+  * Feature: Stable API
   * Bugfix: Handle refused connections to FreeSWITCH
 
 # 0.3.1
