@@ -1,5 +1,8 @@
 # develop
 
+# 1.0.1
+  * Bugfix: Bump celluloid dependency
+
 # 1.0.0
   * Feature: Stable API
   * Bugfix: Handle refused connections to FreeSWITCH
