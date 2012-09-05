@@ -36,8 +36,8 @@ module RubyFS
       @stream.run!
       sleep 0.1
       fake_client.call s if fake_client.respond_to? :call
-      s.join
-      @stream.join
+      Celluloid::Actor.join s
+      Celluloid::Actor.join @stream
     end
 
     def expect_connected_event
