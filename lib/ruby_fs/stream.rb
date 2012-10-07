@@ -152,11 +152,12 @@ module RubyFS
     end
 
     def receive_request(headers, content)
+      content.strip!
       case headers[:content_type]
       when 'text/event-json'
         fire_event Event.new(headers, json_content_2_hash(content))
-      when 'command/reply'
-        @command_callbacks.pop.call CommandReply.new(headers)
+      when 'command/reply', 'api/response'
+        @command_callbacks.pop.call CommandReply.new(headers, (content == '' ? nil : content))
       when 'auth/request'
         command "auth #{@secret}" do
           command! "event json ALL" if @events
