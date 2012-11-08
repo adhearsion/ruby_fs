@@ -165,12 +165,14 @@ foo-bar: doo_dah
     it "can send API commands and returns the response" do
       expect_connected_event
       expect_disconnected_event
-      reply = CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
+      reply = CommandReply.new({:content_type => 'api/response', :content_length => '41'}, '+OK 396dd34a-10ba-11e2-b64a-37a9f8360f21')
       mocked_server(1, lambda { |server| @stream.api('foo').should == reply }) do |val, server|
         val.should == "api foo\n\n"
         server.send_data %Q(
-Content-Type: command/reply
-Reply-Text: +OK accepted
+Content-Type: api/response
+Content-Length: 41
+
++OK 396dd34a-10ba-11e2-b64a-37a9f8360f21
 
 )
       end

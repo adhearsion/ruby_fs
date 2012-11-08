@@ -1,5 +1,8 @@
 # develop
 
+# 1.0.2
+  * Bugfix: Interpret API responses correctly
+
 # 1.0.1
   * Bugfix: Bump celluloid dependency
 
