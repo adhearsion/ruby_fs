@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'timeout'
 
 module RubyFS
   describe Stream do
@@ -37,7 +38,9 @@ module RubyFS
       sleep 0.1
       fake_client.call s if fake_client.respond_to? :call
       Celluloid::Actor.join s
-      Celluloid::Actor.join @stream
+      Timeout.timeout 5 do
+        Celluloid::Actor.join @stream
+      end
     end
 
     def expect_connected_event
