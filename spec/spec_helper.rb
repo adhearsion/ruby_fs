@@ -1,5 +1,4 @@
 require 'ruby_fs'
-require 'mocha'
 
 Dir[File.dirname(__FILE__) + "/support/**/*.rb"].each {|f| require f}
 
