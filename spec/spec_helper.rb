@@ -2,8 +2,6 @@ require 'ruby_fs'
 
 Dir[File.dirname(__FILE__) + "/support/**/*.rb"].each {|f| require f}
 
-include RubyFS
-
 RSpec.configure do |config|
   config.mock_with :rspec
   config.filter_run :focus => true
