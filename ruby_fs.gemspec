@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = RubyFS::VERSION
   s.authors     = ["Ben Langfeld"]
   s.email       = ["ben@langfeld.me"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/adhearsion/ruby_fs"
   s.summary     = %q{Wrapping FreeSWITCH EventSocket for rubyists}
   s.description = %q{A Ruby client library for the FreeSWITCH EventSocket API built on Celluloid.}
 
