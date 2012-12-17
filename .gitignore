@@ -10,3 +10,4 @@ coverage
 spec/reports
 vendor
 *.swp
+tmp
