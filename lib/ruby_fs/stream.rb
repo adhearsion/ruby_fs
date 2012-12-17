@@ -113,13 +113,12 @@ module RubyFS
 
     #
     # Shutdown the stream and disconnect from the socket
-    def shutdown
-      @socket.close if @socket
-    end
+    alias :shutdown :terminate
 
     # @private
     def finalize
       logger.debug "Finalizing stream"
+      @socket.close if @socket
       @state = :stopped
       fire_event Disconnected.new
     end
