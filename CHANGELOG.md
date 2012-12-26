@@ -1,4 +1,5 @@
 # develop
+  * Bugfix: JRuby compatability
 
 # 1.0.2
   * Bugfix: Interpret API responses correctly
