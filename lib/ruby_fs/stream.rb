@@ -35,8 +35,8 @@ module RubyFS
       @socket = TCPSocket.from_ruby_socket ::TCPSocket.new(@host, @port)
       post_init
       loop { receive_data @socket.readpartial(4096) }
-    rescue EOFError, IOError, Errno::ECONNREFUSED
-      logger.info "Client socket closed!"
+    rescue EOFError, IOError, Errno::ECONNREFUSED => e
+      logger.info "Client socket closed due to (#{e.class}) #{e.message}!"
       terminate
     end
 
@@ -113,13 +113,12 @@ module RubyFS
 
     #
     # Shutdown the stream and disconnect from the socket
-    def shutdown
-      @socket.close if @socket
-    end
+    alias :shutdown :terminate
 
     # @private
     def finalize
       logger.debug "Finalizing stream"
+      @socket.close if @socket
       @state = :stopped
       fire_event Disconnected.new
     end

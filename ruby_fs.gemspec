@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = RubyFS::VERSION
   s.authors     = ["Ben Langfeld"]
   s.email       = ["ben@langfeld.me"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/adhearsion/ruby_fs"
   s.summary     = %q{Wrapping FreeSWITCH EventSocket for rubyists}
   s.description = %q{A Ruby client library for the FreeSWITCH EventSocket API built on Celluloid.}
 
@@ -23,12 +23,8 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency %q<bundler>, ["~> 1.0"]
   s.add_development_dependency %q<rspec>, [">= 2.5.0"]
-  s.add_development_dependency %q<ci_reporter>, [">= 1.6.3"]
-  s.add_development_dependency %q<yard>, ["~> 0.6.0"]
+  s.add_development_dependency %q<yard>, ["~> 0.6"]
   s.add_development_dependency %q<rake>, [">= 0"]
-  s.add_development_dependency %q<mocha>, [">= 0"]
-  s.add_development_dependency %q<simplecov>, [">= 0"]
-  s.add_development_dependency %q<simplecov-rcov>, [">= 0"]
   s.add_development_dependency %q<guard-rspec>
-  s.add_development_dependency %q<ruby_gntp>
+  s.add_development_dependency %q<rb-fsevent>, ['~> 0.9']
 end

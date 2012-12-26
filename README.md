@@ -35,4 +35,4 @@ end
 
 ## Copyright
 
-Copyright (c) 2012 Ben Langfeld. MIT licence (see LICENSE for details).
+Copyright (c) 2012 Adhearsion Foundation Inc. MIT licence (see LICENSE for details).
