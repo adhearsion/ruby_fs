@@ -1,4 +1,6 @@
 # develop
+
+# 1.0.3
   * Bugfix: JRuby compatability
 
 # 1.0.2
