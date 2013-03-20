@@ -231,7 +231,7 @@ Reply-Text: +OK accepted
       end
     end
 
-    it "can execute applications on calls with options and returns the response" do
+    it "can execute applications on calls with options (in the body) and returns the response" do
       expect_connected_event
       expect_disconnected_event
       reply = CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
@@ -239,7 +239,10 @@ Reply-Text: +OK accepted
         val.should == %Q(SendMsg aUUID
 call-command: execute
 execute-app-name: playback
-execute-app-arg: /tmp/test.wav
+content-type: text/plain
+content-length: 13
+
+/tmp/test.wav
 
 )
         server.send_data %Q(
