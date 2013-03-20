@@ -1,4 +1,5 @@
 # develop
+  * Bugfix: Loosen celluloid dependency
 
 # 1.0.3
   * Bugfix: JRuby compatability
