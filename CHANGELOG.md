@@ -1,4 +1,6 @@
 # develop
+
+# 1.0.4
   * Bugfix: Loosen celluloid dependency
 
 # 1.0.3
