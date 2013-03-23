@@ -3,11 +3,13 @@ MockServer = Class.new
 class ServerMock
   include Celluloid::IO
 
+  finalizer :finalize
+
   def initialize(host, port, mock_target = MockServer.new)
     @server = TCPServer.new host, port
     @mock_target = mock_target
     @clients = []
-    run!
+    async.run
   end
 
   def finalize
@@ -18,7 +20,7 @@ class ServerMock
 
   def run
     after(1) { terminate }
-    loop { handle_connection! @server.accept }
+    loop { async.handle_connection @server.accept }
   end
 
   def handle_connection(socket)

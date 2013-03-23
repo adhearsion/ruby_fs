@@ -34,7 +34,7 @@ module RubyFS
       mock_target.should_receive(:receive_data).send(*(times ? [:exactly, times] : [:at_least, 1])).with &block
       s = ServerMock.new '127.0.0.1', server_port, mock_target
       @stream = Stream.new '127.0.0.1', server_port, secret, lambda { |m| client.message_received m }, events
-      @stream.run!
+      @stream.async.run
       sleep 0.1
       fake_client.call s if fake_client.respond_to? :call
       Celluloid::Actor.join s
@@ -156,7 +156,7 @@ Reply-Text: +OK accepted
     it "can send commands with options" do
       expect_connected_event
       expect_disconnected_event
-      mocked_server(1, lambda { |server| @stream.command! 'foo', :one => 1, :foo_bar => :doo_dah }) do |val, server|
+      mocked_server(1, lambda { |server| @stream.async.command 'foo', :one => 1, :foo_bar => :doo_dah }) do |val, server|
         val.should == %Q(foo
 one: 1
 foo-bar: doo_dah
@@ -231,7 +231,7 @@ Reply-Text: +OK accepted
       end
     end
 
-    it "can execute applications on calls with options and returns the response" do
+    it "can execute applications on calls with options (in the body) and returns the response" do
       expect_connected_event
       expect_disconnected_event
       reply = CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK accepted')
@@ -239,7 +239,10 @@ Reply-Text: +OK accepted
         val.should == %Q(SendMsg aUUID
 call-command: execute
 execute-app-name: playback
-execute-app-arg: /tmp/test.wav
+content-type: text/plain
+content-length: 13
+
+/tmp/test.wav
 
 )
         server.send_data %Q(
