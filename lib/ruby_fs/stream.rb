@@ -17,6 +17,8 @@ module RubyFS
 
     include Celluloid::IO
 
+    finalizer :finalize
+
     def initialize(host, port, secret, event_callback, events = true)
       super()
       @host, @port, @secret, @event_callback, @events = host, port, secret, event_callback, events
@@ -115,14 +117,6 @@ module RubyFS
     # Shutdown the stream and disconnect from the socket
     alias :shutdown :terminate
 
-    # @private
-    def finalize
-      logger.debug "Finalizing stream"
-      @socket.close if @socket
-      @state = :stopped
-      fire_event Disconnected.new
-    end
-
     #
     # Fire an event to the specified callback
     #
@@ -145,6 +139,13 @@ module RubyFS
 
     private
 
+    def finalize
+      logger.debug "Finalizing stream"
+      @socket.close if @socket
+      @state = :stopped
+      fire_event Disconnected.new
+    end
+
     def receive_data(data)
       logger.trace "[RECV] #{data}"
       @lexer << data
@@ -159,7 +160,7 @@ module RubyFS
         @command_callbacks.pop.call CommandReply.new(headers, (content == '' ? nil : content))
       when 'auth/request'
         command "auth #{@secret}" do
-          command! "event json ALL" if @events
+          async.command "event json ALL" if @events
         end
       when 'text/disconnect-notice'
         terminate
