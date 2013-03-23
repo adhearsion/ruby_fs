@@ -62,9 +62,11 @@ module RubyFS
       uuid = SecureRandom.uuid
       @command_callbacks << (callback || lambda { |reply| signal uuid, reply })
       string = "#{command}\n"
+      body_value = options.delete :command_body_value
       options.each_pair do |key, value|
         string << "#{key.to_s.gsub '_', '-'}: #{value}\n" if value
       end
+      string << "\n" << body_value << "\n" if body_value
       string << "\n"
       send_data string
       wait uuid unless callback
@@ -110,7 +112,13 @@ module RubyFS
     #
     # @return [RubyFS::Response] response the application's response object
     def application(call, appname, options = nil)
-      sendmsg call, :call_command => 'execute', :execute_app_name => appname, :execute_app_arg => options
+      opts = {call_command: 'execute', execute_app_name: appname}
+      if options
+        opts[:content_type]       = 'text/plain'
+        opts[:content_length]     = options.bytesize
+        opts[:command_body_value] = options
+      end
+      sendmsg call, opts
     end
 
     #

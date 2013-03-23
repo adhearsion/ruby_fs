@@ -1,4 +1,5 @@
 # develop
+  * Bugfix: Allow sending large app arguments. Application arguments (headers in general) are limited to 2048 bytes. The work-around is to send them in the body of the message with a content-length header.
 
 # 1.0.4
   * Bugfix: Loosen celluloid dependency
