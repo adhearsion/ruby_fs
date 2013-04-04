@@ -168,7 +168,7 @@ module RubyFS
         @command_callbacks.pop.call CommandReply.new(headers, (content == '' ? nil : content))
       when 'auth/request'
         command "auth #{@secret}" do
-          async.command "event json ALL" if @events
+          async.command "event json #{event_mask}" if @events
         end
       when 'text/disconnect-notice'
         terminate
@@ -181,7 +181,7 @@ module RubyFS
       json = JSON.parse content
       {}.tap do |hash|
         json.each_pair do |k, v|
-          hash[k.downcase.gsub(/-/,"_").intern] = v
+          hash[k.downcase.gsub('-',"_").intern] = v
         end
       end
     end
@@ -189,6 +189,12 @@ module RubyFS
     def post_init
       @state = :started
       fire_event Connected.new
+    end
+
+    def event_mask
+      return 'ALL' if @events == true
+
+      Array(@events).join(' ')
     end
   end
 end
