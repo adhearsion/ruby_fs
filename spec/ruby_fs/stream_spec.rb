@@ -301,7 +301,7 @@ Reply-Text: +OK accepted
     end
 
     context 'with events turned off' do
-      it 'does not the event mask after authenticating' do
+      it 'does not set the event mask after authenticating' do
         mocked_server(1, lambda { |server| server.send_data "Content-Type: auth/request\n\n" }) do |val, server|
           val.should == "auth ClueCon\n\n"
           server.send_data %Q(
@@ -309,6 +309,68 @@ Content-Type: command/reply
 Reply-Text: +OK accepted
 
 )
+        end
+
+        client_messages.should be == [
+          Stream::Connected.new,
+          Stream::Disconnected.new
+        ]
+      end
+    end
+
+    context 'with an event mask fully specified as a string' do
+      let(:events) { 'CODEC CHANNEL_STATE' }
+
+      it 'sets the event mask after authenticating' do
+        mocked_server(2, lambda { |server| server.send_data "Content-Type: auth/request\n\n" }) do |val, server|
+          case @sequence
+          when 1
+            val.should == "auth ClueCon\n\n"
+            server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+          when 2
+            val.should == "event json CODEC CHANNEL_STATE\n\n"
+            server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+          end
+          @sequence += 1
+        end
+
+        client_messages.should be == [
+          Stream::Connected.new,
+          Stream::Disconnected.new
+        ]
+      end
+    end
+
+    context 'with an event mask fully specified as an array' do
+      let(:events) { ['CODEC', 'CHANNEL_STATE'] }
+
+      it 'sets the event mask after authenticating' do
+        mocked_server(2, lambda { |server| server.send_data "Content-Type: auth/request\n\n" }) do |val, server|
+          case @sequence
+          when 1
+            val.should == "auth ClueCon\n\n"
+            server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+          when 2
+            val.should == "event json CODEC CHANNEL_STATE\n\n"
+            server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK accepted
+
+)
+          end
+          @sequence += 1
         end
 
         client_messages.should be == [
