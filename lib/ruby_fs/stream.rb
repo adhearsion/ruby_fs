@@ -181,7 +181,7 @@ module RubyFS
       json = JSON.parse content
       {}.tap do |hash|
         json.each_pair do |k, v|
-          hash[k.downcase.gsub(/-/,"_").intern] = v
+          hash[k.downcase.gsub('-',"_").intern] = v
         end
       end
     end
