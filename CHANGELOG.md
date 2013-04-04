@@ -1,5 +1,9 @@
 # develop
 
+# 1.1.0
+  * Feature: Allow specifying an event mask (other than 'ALL') when connecting
+  * CS: Minor performance improvements from removing repeated regex compilation
+
 # 1.0.5
   * Bugfix: Allow sending large app arguments. Application arguments (headers in general) are limited to 2048 bytes. The work-around is to send them in the body of the message with a content-length header.
   * CS: Avoid Celluloid deprecation warnings
