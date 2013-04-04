@@ -1,6 +1,7 @@
 module RubyFS
   class Lexer
     ContentLengthPattern  = /Content-length:\s*(\d+)/i
+    HeaderFormatPattern   = /\A([^\s:]+)\s*:\s*/
 
     def initialize(callback)
       @callback = callback
@@ -135,9 +136,9 @@ module RubyFS
     def headers_2_hash(headers)
       {}.tap do |hash|
         headers.each do |h|
-          if /\A([^\s:]+)\s*:\s*/ =~ h
+          if HeaderFormatPattern =~ h
             tail = $'.dup
-            hash[$1.downcase.gsub(/-/, "_").intern] = tail
+            hash[$1.downcase.gsub('-', "_").intern] = tail
           end
         end
       end
