@@ -1,8 +1,6 @@
 module RubyFS
   class Lexer
     ContentLengthPattern  = /Content-length:\s*(\d+)/i
-    MaxLineLength         = 16 * 1024
-    MaxBinaryLength       = 32 * 1024 * 1024
 
     def initialize(callback)
       @callback = callback
