@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 MockServer = Class.new
 
 class ServerMock

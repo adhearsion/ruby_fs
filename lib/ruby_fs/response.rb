@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module RubyFS
   class Response
     attr_reader :headers, :content
