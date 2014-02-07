@@ -14,9 +14,8 @@ stream = RubyFS::Stream.new '127.0.0.1', 8021, 'ClueCon', lambda { |e| p e }
 
 stream.run
 
-stream.api 'originate sofia/mydomain.com/ext@yourvsp.com 1000' do |response|
-  puts "Originate response was #{response.inspect}"
-end
+response = stream.api 'originate sofia/mydomain.com/ext@yourvsp.com 1000'
+puts "Originate response was #{response.inspect}"
 ```
 
 ## Links

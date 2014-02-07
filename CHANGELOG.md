@@ -1,5 +1,8 @@
 # develop
 
+# 1.1.1
+  * CS: Remove explicit dependency on json, since we only support Ruby > 1.9 and JSON support is bundled.
+
 # 1.1.0
   * Feature: Allow specifying an event mask (other than 'ALL') when connecting
   * CS: Minor performance improvements from removing repeated regex compilation

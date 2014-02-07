@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module RubyFS
   class Lexer
     ContentLengthPattern  = /Content-length:\s*(\d+)/i

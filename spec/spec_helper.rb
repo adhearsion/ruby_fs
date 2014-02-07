@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'ruby_fs'
 
 Dir[File.dirname(__FILE__) + "/support/**/*.rb"].each {|f| require f}
