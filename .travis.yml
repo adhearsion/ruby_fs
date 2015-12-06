@@ -12,3 +12,4 @@ matrix:
     - rvm: ruby-head
 notifications:
   irc: "irc.freenode.org#adhearsion"
+sudo: false
