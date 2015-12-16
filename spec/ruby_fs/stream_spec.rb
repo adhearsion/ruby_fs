@@ -78,7 +78,7 @@ module RubyFS
         mocked_server(0, lambda { |server| @stream.shutdown }) do |val, server|
           @stream.should be_started
         end
-        @stream.should_not be_alive
+        @stream.alive?.should be false
       end
     end
 

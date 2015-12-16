@@ -61,8 +61,8 @@ module RubyFS
     #
     # @return [RubyFS::Response] response the command's response object
     def command(command, options = {}, &callback)
-      uuid = SecureRandom.uuid
-      @command_callbacks << (callback || lambda { |reply| signal uuid, reply })
+      condition = Celluloid::Condition.new unless callback
+      @command_callbacks << (callback || lambda { |reply| condition.broadcast reply })
       string = "#{command}\n"
       body_value = options.delete :command_body_value
       options.each_pair do |key, value|
@@ -71,7 +71,7 @@ module RubyFS
       string << "\n" << body_value << "\n" if body_value
       string << "\n"
       send_data string
-      wait uuid unless callback
+      condition.wait unless callback
     end
 
     #
