@@ -78,7 +78,7 @@ module RubyFS
         mocked_server(0, lambda { |server| @stream.shutdown }) do |val, server|
           @stream.should be_started
         end
-        @stream.should_not be_alive
+        @stream.alive?.should be false
       end
     end
 
@@ -152,6 +152,32 @@ Content-Type: command/reply
 Reply-Text: +OK accepted
 
 )
+      end
+    end
+
+    it "continues delivering events after executing a command" do
+      expect_connected_event
+      client.should_receive(:message_received).with RubyFS::Event.new({:content_length => "668", :content_type => "text/event-json"}, {:command => "sendevent message_waiting", :mwi_messages_waiting => "yes", :mwi_message_account => "sip:userc@192.168.79.100", :mwi_voice_message => "2/0 (0/0)", :event_uuid => "3b8fc6e0-8828-4622-8687-f31c8f60cbf1", :event_name => "MESSAGE_WAITING", :core_uuid => "4d678800-a20c-49fb-8c05-7e83ca6f791b", :freeswitch_hostname => "pbx", :freeswitch_switchname => "pbx", :freeswitch_ipv4 => "10.0.2.15", :freeswitch_ipv6 => "::1", :event_date_local => "2015-12-12 00:43:05", :event_date_gmt => "Sat, 12 Dec 2015 00:43:05 GMT", :event_date_timestamp => "1449880985640858", :event_calling_file => "mod_event_socket.c", :event_calling_function => "parse_command", :event_calling_line_number => "2239", :event_sequence => "465"})
+      expect_disconnected_event
+      reply = CommandReply.new(:content_type => 'command/reply', :reply_text => '+OK 3b8fc6e0-8828-4622-8687-f31c8f60cbf1')
+      mocked_server(1, lambda { |server| @stream.command('sendevent message_waiting', 'MWI-Messages-Waiting' => 'yes', 'MWI-Message-Account' => 'sip:userc@192.168.79.100', 'MWI-Voice-Message' => '2/0 (0/0)').should == reply }) do |val, server|
+        val.should == %Q(sendevent message_waiting
+MWI-Messages-Waiting: yes
+MWI-Message-Account: sip:userc@192.168.79.100
+MWI-Voice-Message: 2/0 (0/0)
+
+)
+
+        server.send_data %Q(
+Content-Type: command/reply
+Reply-Text: +OK 3b8fc6e0-8828-4622-8687-f31c8f60cbf1
+
+)
+        server.send_data %Q(
+Content-Length: 668
+Content-Type: text/event-json
+
+{"Command":"sendevent message_waiting","MWI-Messages-Waiting":"yes","MWI-Message-Account":"sip:userc@192.168.79.100","MWI-Voice-Message":"2/0 (0/0)","Event-UUID":"3b8fc6e0-8828-4622-8687-f31c8f60cbf1","Event-Name":"MESSAGE_WAITING","Core-UUID":"4d678800-a20c-49fb-8c05-7e83ca6f791b","FreeSWITCH-Hostname":"pbx","FreeSWITCH-Switchname":"pbx","FreeSWITCH-IPv4":"10.0.2.15","FreeSWITCH-IPv6":"::1","Event-Date-Local":"2015-12-12 00:43:05","Event-Date-GMT":"Sat, 12 Dec 2015 00:43:05 GMT","Event-Date-Timestamp":"1449880985640858","Event-Calling-File":"mod_event_socket.c","Event-Calling-Function":"parse_command","Event-Calling-Line-Number":"2239","Event-Sequence":"465"})
       end
     end
 
